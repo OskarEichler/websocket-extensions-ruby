@@ -9,6 +9,7 @@ module WebSocket
       QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"\\])*)"/
       PARAM    = %r{#{ TOKEN.source }(?:[ \t]*=[ \t]*(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
       EXT      = %r{#{ TOKEN.source }(?:[ \t]*;[ \t]*#{ PARAM.source })*}
+      EXT_START = %r{[ \t]*#{ EXT.source }}
       EXT_LIST = %r{\A[ \t]*#{ EXT.source }(?:[ \t]*,[ \t]*#{ EXT.source })*[ \t]*\z}
       NUMBER   = /\A-?(0|[1-9][0-9]*)(\.[0-9]+)?\z/
 
@@ -23,8 +24,7 @@ module WebSocket
         end
 
         scanner = StringScanner.new(header)
-        scanner.skip(/[ \t]*/)
-        value   = scanner.scan(EXT)
+        value   = scanner.scan(EXT_START)
 
         until value.nil?
           params = value.scan(PARAM)
