@@ -67,6 +67,12 @@ describe WebSocket::Extensions::Parser do
       ]
     end
 
+    it "preserves more than two duplicate params in order" do
+      expect(parse "a; b=1; b=2; b=3").to eq [
+        { :name => "a", :params => { "b" => [1, 2, 3] } }
+      ]
+    end
+
     it "parses multiple complex offers" do
       expect(parse 'a; b=1, c, b; d, c; e="hi, there"; e, a; b').to eq [
         { :name => "a", :params => { "b" => 1 } },
