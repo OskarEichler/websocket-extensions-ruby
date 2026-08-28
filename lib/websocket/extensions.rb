@@ -67,6 +67,7 @@ module WebSocket
       end
 
       @sessions = sessions
+      @client_sessions = sessions
       @index    = index
 
       offer.size > 0 ? offer.join(', ') : nil
@@ -169,7 +170,10 @@ module WebSocket
     def close
       return unless @sessions
 
-      @sessions.each do |ext, session|
+      sessions = @client_sessions || @sessions
+      @client_sessions, @sessions = nil, []
+
+      sessions.each do |ext, session|
         session.close rescue nil
       end
     end
