@@ -23,7 +23,7 @@ module WebSocket
         end
 
         scanner = StringScanner.new(header)
-        scanner.scan(/[ \t]*/)
+        scanner.skip(/[ \t]*/)
         value   = scanner.scan(EXT)
 
         until value.nil?
@@ -52,7 +52,7 @@ module WebSocket
 
           offers.push(name, offer)
 
-          scanner.scan(/[ \t]*,[ \t]*/)
+          scanner.skip(/[ \t]*,[ \t]*/)
           value = scanner.scan(EXT)
         end
         offers
