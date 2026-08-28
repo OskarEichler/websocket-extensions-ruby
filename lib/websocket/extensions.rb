@@ -135,23 +135,25 @@ module WebSocket
     alias :valid_frame_rsv? :valid_frame_rsv
 
     def process_incoming_message(message)
-      @sessions.reverse.inject(message) do |msg, (ext, session)|
+      @sessions.reverse_each do |ext, session|
         begin
-          session.process_incoming_message(msg)
+          message = session.process_incoming_message(message)
         rescue => error
           raise ExtensionError, [ext.name, error.message].join(': ')
         end
       end
+      message
     end
 
     def process_outgoing_message(message)
-      @sessions.inject(message) do |msg, (ext, session)|
+      @sessions.each do |ext, session|
         begin
-          session.process_outgoing_message(msg)
+          message = session.process_outgoing_message(message)
         rescue => error
           raise ExtensionError, [ext.name, error.message].join(': ')
         end
       end
+      message
     end
 
     def close
