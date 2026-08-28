@@ -75,6 +75,7 @@ module WebSocket
     def activate(header)
       responses = Parser.parse_header(header)
       @sessions = []
+      activated = {}
 
       responses.each_offer do |name, params|
         unless record = @index[name]
@@ -82,6 +83,11 @@ module WebSocket
         end
 
         ext, session = *record
+
+        if activated[name]
+          raise ExtensionError, %Q{Server sent multiple responses for extension "#{ name }"}
+        end
+        activated[name] = true
 
         if reserved = reserved?(ext)
           raise ExtensionError, %Q{Server sent two extension responses that use the RSV#{ reserved[0] }} +
