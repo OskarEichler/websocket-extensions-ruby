@@ -43,7 +43,8 @@ module WebSocket
             end
 
             if offer.has_key?(key)
-              offer[key] = [*offer[key]] + [data]
+              offer[key] = [offer[key]] unless offer[key].is_a?(Array)
+              offer[key].push(data)
             else
               offer[key] = data
             end
