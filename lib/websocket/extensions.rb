@@ -115,6 +115,12 @@ module WebSocket
 
       @sessions = sessions
       response.size > 0 ? response.join(', ') : nil
+    ensure
+      if sessions and !sessions.equal?(@sessions)
+        sessions.each do |ext, session|
+          session.close rescue nil
+        end
+      end
     end
 
     def valid_frame_rsv(frame)
