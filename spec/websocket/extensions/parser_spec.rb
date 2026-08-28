@@ -55,6 +55,15 @@ describe WebSocket::Extensions::Parser do
       ]
     end
 
+    it "round-trips empty and escaped quoted values" do
+      ["", "a\\b", "a\"b"].each do |value|
+        header = WebSocket::Extensions::Parser.serialize_params("a", "b" => value)
+        expect(parse(header)).to eq [
+          { :name => "a", :params => { "b" => value } }
+        ]
+      end
+    end
+
     it "parses multiple params" do
       expect(parse 'a; b; c=1; d="hi"').to eq [
         { :name => "a", :params => { "b" => true, "c" => 1, "d" => "hi" } }
