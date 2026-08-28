@@ -74,6 +74,7 @@ module WebSocket
 
     def activate(header)
       responses = Parser.parse_header(header)
+      pending = @index.dup
       @sessions = []
       activated = {}
 
@@ -100,6 +101,13 @@ module WebSocket
 
         reserve(ext)
         @sessions.push(record)
+        pending.delete(name)
+      end
+    ensure
+      if pending
+        pending.each_value do |ext, session|
+          session.close rescue nil
+        end
       end
     end
 
@@ -163,7 +171,8 @@ module WebSocket
     def close
       return unless @sessions
 
-      @sessions.each do |ext, session|
+      sessions, @sessions = @sessions, []
+      sessions.each do |ext, session|
         session.close rescue nil
       end
     end
