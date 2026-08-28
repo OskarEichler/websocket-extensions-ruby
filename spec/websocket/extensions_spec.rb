@@ -325,6 +325,16 @@ describe WebSocket::Extensions do
         expect(@extensions.generate_response("deflate, tar")).to eq "deflate; mode=compress"
       end
 
+      it "closes constructed sessions when response generation fails" do
+        allow(@nonconflict_session).to receive(:generate_response).and_raise(TypeError)
+        expect(@session).to receive(:close).exactly(1)
+        expect(@nonconflict_session).to receive(:close).exactly(1)
+
+        expect {
+          @extensions.generate_response("deflate, reverse")
+        }.to raise_error(TypeError)
+      end
+
       it "raises an error if the header is invalid" do
         expect { @extensions.generate_response("x-webkit- -frame") }.to raise_error(WebSocket::Extensions::Parser::ParseError)
       end
