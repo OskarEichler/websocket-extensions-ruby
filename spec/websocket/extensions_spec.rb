@@ -161,6 +161,22 @@ describe WebSocket::Extensions do
       end
     end
 
+    describe :close do
+      before do
+        @extensions.add(@nonconflict)
+        @extensions.generate_offer
+        @extensions.activate("deflate")
+      end
+
+      it "closes selected and unselected sessions only once" do
+        expect(@session).to receive(:close).exactly(1)
+        expect(@nonconflict_session).to receive(:close).exactly(1)
+
+        @extensions.close
+        @extensions.close
+      end
+    end
+
     describe :process_incoming_message do
       before do
         @extensions.add(@conflict)
