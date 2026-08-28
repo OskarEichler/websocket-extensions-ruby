@@ -7,10 +7,10 @@ module WebSocket
       TOKEN    = /([!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+)/
       NOTOKEN  = /([^!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z])/
       QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"\\])*)"/
-      PARAM    = %r{#{ TOKEN.source }(?:=(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
-      EXT      = %r{#{ TOKEN.source }(?: *; *#{ PARAM.source })*}
-      EXT_LIST = %r{^#{ EXT.source }(?: *, *#{ EXT.source })*$}
-      NUMBER   = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/
+      PARAM    = %r{#{ TOKEN.source }(?:[ \t]*=[ \t]*(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
+      EXT      = %r{#{ TOKEN.source }(?:[ \t]*;[ \t]*#{ PARAM.source })*}
+      EXT_LIST = %r{\A[ \t]*#{ EXT.source }(?:[ \t]*,[ \t]*#{ EXT.source })*[ \t]*\z}
+      NUMBER   = /\A-?(0|[1-9][0-9]*)(\.[0-9]+)?\z/
 
       ParseError = Class.new(ArgumentError)
 
@@ -23,6 +23,7 @@ module WebSocket
         end
 
         scanner = StringScanner.new(header)
+        scanner.scan(/[ \t]*/)
         value   = scanner.scan(EXT)
 
         until value.nil?
@@ -51,7 +52,7 @@ module WebSocket
 
           offers.push(name, offer)
 
-          scanner.scan(/ *, */)
+          scanner.scan(/[ \t]*,[ \t]*/)
           value = scanner.scan(EXT)
         end
         offers
