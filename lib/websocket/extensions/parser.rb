@@ -34,7 +34,7 @@ module WebSocket
             if unquoted
               data = unquoted
             elsif quoted
-              data = quoted.gsub(/\\/, '')
+              data = quoted.gsub(/\\([\x00-\x7f])/, '\1')
             else
               data = true
             end
@@ -66,8 +66,8 @@ module WebSocket
           when true    then values.push(key)
           when Numeric then values.push(key + '=' + value.to_s)
           else
-            if value =~ NOTOKEN
-              values.push(key + '="' + value.gsub(/"/, '\"') + '"')
+            if value == '' or value =~ NOTOKEN
+              values.push(key + '="' + value.gsub(/["\\]/) { |char| '\\' + char } + '"')
             else
               values.push(key + '=' + value)
             end
