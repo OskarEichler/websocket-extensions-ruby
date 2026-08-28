@@ -120,6 +120,13 @@ describe WebSocket::Extensions do
         expect { @extensions.activate("tar") }.not_to raise_error
       end
 
+      it "rejects duplicate responses for an extension without reserved bits" do
+        allow(@ext).to receive(:rsv1).and_return(false)
+        expect(@session).to receive(:activate).with({}).exactly(1).and_return(true)
+
+        expect { @extensions.activate("deflate, deflate") }.to raise_error(ExtensionError)
+      end
+
       it "raises if two extensions conflict on RSV bits" do
         expect { @extensions.activate("deflate, tar") }.to raise_error(ExtensionError)
       end
