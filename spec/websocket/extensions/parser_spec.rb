@@ -24,6 +24,18 @@ describe WebSocket::Extensions::Parser do
       ]
     end
 
+    it "parses HTTP whitespace around delimiters" do
+      expect(parse " \ta \t; mode \t= compress \t, other \t").to eq [
+        { :name => "a", :params => { "mode" => "compress" } },
+        { :name => "other", :params => {} }
+      ]
+    end
+
+    it "rejects input outside the complete header value" do
+      expect { parse "\na" }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+      expect { parse "a\n" }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+    end
+
     it "parses two offers with no params" do
       expect(parse 'a, b').to eq [
         { :name => "a", :params => {} }, { :name => "b", :params => {} }
