@@ -71,6 +71,12 @@ module WebSocket
       @index    = index
 
       offer.size > 0 ? offer.join(', ') : nil
+    ensure
+      if sessions and !sessions.equal?(@client_sessions)
+        sessions.each do |ext, session|
+          session.close rescue nil
+        end
+      end
     end
 
     def activate(header)
