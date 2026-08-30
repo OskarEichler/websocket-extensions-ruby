@@ -46,6 +46,8 @@ module WebSocket
     end
 
     def generate_offer
+      reset_negotiation
+
       sessions = []
       offer    = []
       index    = {}
@@ -111,9 +113,11 @@ module WebSocket
     end
 
     def generate_response(header)
+      offers = Parser.parse_header(header)
+      reset_negotiation
+
       sessions = []
       response = []
-      offers   = Parser.parse_header(header)
 
       @in_order.each do |ext|
         offer = offers.by_name(ext.name)
@@ -187,6 +191,21 @@ module WebSocket
     end
 
   private
+
+    def reset_negotiation
+      if @resetting_negotiation
+        raise ExtensionError, 'Cannot start negotiation while prior sessions are closing'
+      end
+
+      @resetting_negotiation = true
+      begin
+        close if @client_sessions or !@sessions.empty?
+        @rsv1 = @rsv2 = @rsv3 = nil
+        @index.clear
+      ensure
+        @resetting_negotiation = false
+      end
+    end
 
     def reserve(ext)
       @rsv1 ||= ext.rsv1 && ext.name
